@@ -4,6 +4,8 @@ import model.Commands;
 import model.Field;
 import model.Plate;
 import model.Timer;
+import model.highscores.TableRow;
+import view.HighScoresDialog;
 import view.MessageType;
 import view.UserInterface;
 
@@ -11,6 +13,8 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,9 +23,11 @@ public class ConsoleUI extends Thread implements UserInterface, DocumentListener
 
     private JTextArea fieldArea;
     private JTextField timeArea;
+    private JTextField bombCountArea;
     private JTextArea userCommandArea;
     private JPanel panel;
     private JFrame console;
+    private JPanel topPanel;
 
     private TextView view;
 
@@ -29,43 +35,62 @@ public class ConsoleUI extends Thread implements UserInterface, DocumentListener
         this.view = view;
         console = new JFrame("MineSweeper");
 
-        timeArea = new JTextField(50);
+        timeArea = new JTextField(10);
         timeArea.setBackground(Color.LIGHT_GRAY);
         timeArea.setFont(new Font("TimesRoman", Font.BOLD, 12));
         timeArea.setEditable(false);
         timeArea.setVisible(true);
 
-        fieldArea = new JTextArea( 11, 50);
-        //fieldArea.setBackground(Color.BLACK);
+        bombCountArea = new JTextField(10);
+        bombCountArea.setBackground(Color.LIGHT_GRAY);
+        bombCountArea.setFont(new Font("TimesRoman", Font.BOLD, 12));
+        bombCountArea.setEditable(false);
+        bombCountArea.setVisible(true);
+
+        topPanel = new JPanel();
+        topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.X_AXIS));
+        topPanel.add(bombCountArea);
+        topPanel.add(timeArea);
+
+        fieldArea = new JTextArea( 10, 10);
         fieldArea.setFont(new Font("TimesRoman", Font.BOLD, 18));
         fieldArea.setEditable(false);
         fieldArea.setVisible(true);
 
-        userCommandArea = new JTextArea(5,50);
+        userCommandArea = new JTextArea(1,20);
         userCommandArea.setBackground(Color.LIGHT_GRAY);
+        userCommandArea.setFont(new Font("TimesRoman", Font.PLAIN, 15));
         userCommandArea.setEditable(true);
         userCommandArea.setVisible(true);
         userCommandArea.getDocument().addDocumentListener(this);
 
         panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.add(timeArea);
-        panel.add(fieldArea);
-        panel.add(userCommandArea);
+        panel.setLayout(new BorderLayout());
+        panel.add(topPanel, BorderLayout.NORTH);
+        panel.add(fieldArea, BorderLayout.CENTER);
+        panel.add(userCommandArea, BorderLayout.SOUTH);
 
         console.setContentPane(panel);
-        console.setBounds(10, 10, 600, 400);
+        console.setBounds(20, 20, 400, 300);
         console.setResizable(false);
         console.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        console.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                view.sendCommand(Commands.exit, new ArrayList<>());
+                super.windowClosing(e);
+            }
+        });
+        console.pack();
         console.setVisible(true);
     }
 
     @Override
     public void drawField(Field field){
-        fieldArea.setRows(field.getHeight() + 1);
         int width = field.getWidth();
         int height = field.getHeight();
         fieldArea.setCaretPosition(0);
+        bombCountArea.setText(field.getEstimatedBombs().toString());
         List<Plate> plateList = field.getPlates();
         StringBuilder fieldLine = new StringBuilder();
         for(int y=0;y<height;++y){
@@ -111,6 +136,13 @@ public class ConsoleUI extends Thread implements UserInterface, DocumentListener
     }
 
     @Override
+    public void setFieldSize(Field field) {
+        fieldArea.setRows(field.getHeight());
+        fieldArea.setColumns(field.getWidth());
+        console.pack();
+    }
+
+    @Override
     public int showMessage(String message, MessageType type){
         if(type == MessageType.info) {
             JOptionPane.showMessageDialog(console, message, "Info", JOptionPane.INFORMATION_MESSAGE);
@@ -118,6 +150,12 @@ public class ConsoleUI extends Thread implements UserInterface, DocumentListener
         }else{
             return JOptionPane.showConfirmDialog(console, message, "Confirm", JOptionPane.YES_NO_CANCEL_OPTION);
         }
+    }
+
+    @Override
+    public int showMessage(MessageType type, List<TableRow> scores) {
+        HighScoresDialog.showDialog(scores, console);
+        return 0;
     }
 
     @Override
@@ -148,6 +186,8 @@ public class ConsoleUI extends Thread implements UserInterface, DocumentListener
             case "pause" -> view.sendCommand(Commands.pause, arguments);
             case "unpause" -> view.sendCommand(Commands.unPause, arguments);
             case "about" -> view.sendCommand(Commands.about, arguments);
+            case "highscores" -> view.sendCommand(Commands.highScores, arguments);
+            case "exit" -> view.sendCommand(Commands.exit, arguments);
             default -> {
                 if(splitedCommand.length < 3){
                     showMessage("Wrong command", MessageType.info);

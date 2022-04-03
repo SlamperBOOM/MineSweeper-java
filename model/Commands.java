@@ -6,5 +6,6 @@ public enum Commands {
     pause,
     unPause,
     highScores,
-    about
+    about,
+    exit
 }

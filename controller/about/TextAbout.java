@@ -9,11 +9,13 @@ public class TextAbout implements About {
     String setPlateDescription;
 
     public TextAbout(){
-        newGameDescription = "newgame *width* *height* *bombcount*: use this command to start new game. " +
-                "You also can use newgame without arguments to choose default field";
-        highScoresDescription = "highscores: shows available highscores";
-        pauseDescription = "pause/unpause: pausing/unpausing the game";
-        setPlateDescription = "*x* *y* *open/flag/unflag*: sets a plate on field in specified status(opened, flagged, closed)";
+        newGameDescription = "-newgame *width* *height* *bombcount*: use this command to start new game. " +
+                "Field size could be between 5x5 and 30x30 and bomb count couldn't be over 25% of field size.\n   " +
+                "You also can use newgame without arguments to choose default field (9x9 with 10 bombs);";
+        highScoresDescription = "-highscores: shows available highscores;";
+        pauseDescription = "-pause/unpause: pausing/unpausing the game;";
+        setPlateDescription = "-*x* *y* *open/flag/unflag*: sets a plate on field in specified status(opened, flagged, closed). " +
+                "You can also use o/f/uf instead.";
     }
 
     @Override

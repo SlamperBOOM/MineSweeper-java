@@ -1,8 +1,10 @@
 package controller;
 
 import controller.about.About;
+import controller.about.GraphicAbout;
 import controller.about.TextAbout;
 import model.Commands;
+import model.highscores.TableRow;
 import view.MessageType;
 import view.Subscriber;
 import view.View;
@@ -10,6 +12,7 @@ import view.graphicView.GraphicView;
 import model.Model;
 import view.textView.TextView;
 
+import java.io.File;
 import java.util.List;
 
 public class Controller implements Informer{
@@ -24,9 +27,11 @@ public class Controller implements Informer{
     }
 
     public void init(){
-        if(showMessage("Do you want to play in Graphic mode?", MessageType.yesNo) == 0){
-            view = new GraphicView(this);
-            model = new Model((Subscriber) view, this);
+        File save = new File("src/model/savedgame.txt");
+        if(save.exists()) {
+            if (showMessage("Do you want to continue?", MessageType.yesNo) == 0) {
+                model.loadGame();
+            }
         }
     }
 
@@ -37,6 +42,11 @@ public class Controller implements Informer{
     @Override
     public int showMessage(String message, MessageType type){
         return view.showMessage(message, type);
+    }
+
+    @Override
+    public int showMessage(MessageType type, List<TableRow> scores) {
+        return view.showMessage(type, scores);
     }
 
     @Override

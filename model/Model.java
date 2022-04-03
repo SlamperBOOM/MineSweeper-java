@@ -1,16 +1,20 @@
 package model;
 
 import controller.Informer;
+import model.highscores.HighScores;
 import view.MessageType;
 import view.Subscriber;
+
+import java.io.File;
 import java.util.*;
 
 public class Model {
     private Field field;
     private Subscriber subscriber;
     private Informer informer;
-    private boolean pause = true;
     private Timer timer;
+    private HighScores highScores;
+    private boolean pause = true;
     private boolean isNewGame = true;
     private boolean isGame = false;
     private long seconds;
@@ -19,11 +23,8 @@ public class Model {
         field = new Field();
         this.subscriber = subscriber;
         this.informer = informer;
-        notifyView();
-    }
-
-    public void setNewField(int width, int height, int bombCount){
-        field = new Field(width, height, bombCount);
+        highScores = new HighScores();
+        notifyView(true);
     }
 
     public Field getField(){
@@ -34,24 +35,45 @@ public class Model {
         return timer;
     }
 
-    public void notifyView(){
-        subscriber.notifyView(this);
+    public void setSeconds(long seconds){
+        this.seconds = seconds;
+    }
+
+    public void notifyView(boolean isNewGame){
+        subscriber.notifyView(this, isNewGame);
+    }
+
+    public void loadGame(){
+        field = GameSaving.loadGame(this);
+        timer = new Timer(this, seconds);
+        pause = false;
+        isNewGame = false;
+        isGame = true;
+        timer.start();
+        notifyView(false);
     }
 
     public void processCommand(Commands command, List<Integer> arguments){
         if(isGame) {
             switch (command) {
                 case newGame -> {
+                    new File("src/model/savedgame.txt").delete();
+                    if(arguments.size() != 0) {
+                        if(arguments.get(0) < 5 || arguments.get(0) > 30 ||
+                        arguments.get(1) < 5 || arguments.get(1) > 30 ||
+                        arguments.get(2) > arguments.get(0)*arguments.get(1) * 0.25){
+                            informer.showMessage("Read about newgame arguments in \"about\"", MessageType.info);
+                        }else {
+                            field = new Field(arguments.get(0), arguments.get(1), arguments.get(2));
+                        }
+                    }else{
+                        field = new Field();
+                    }
                     timer = new Timer(this);
                     pause = false;
                     isNewGame = true;
                     isGame = true;
-                    if(arguments.size() != 0) {
-                        field = new Field(arguments.get(0),arguments.get(1), arguments.get(2));
-                    }else{
-                        field = new Field();
-                    }
-                    notifyView();
+                    notifyView(true);
                 }
                 case setPlate -> {
                     if (isNewGame) {
@@ -63,15 +85,18 @@ public class Model {
                     if (status == 1) {
                         field.openField();
                         processCommand(Commands.pause, arguments);
+                        isGame = false;
                         informer.showMessage("You lost", MessageType.info);
                     } else if (field.getEstimatedBombs() == 0) {
                         if (checkForWin()) {
                             processCommand(Commands.pause, arguments);
                             informer.showMessage("You won!", MessageType.info);
                             isGame = false;
+                            new File("src/model/savedgame.txt").delete();
+                            highScores.addHighScore(field.getWidth(), field.getHeight(), field.getBombCount(), seconds / 1000);
                         }
                     }
-                    notifyView();
+                    notifyView(false);
                 }
                 case pause -> {
                     if(!pause) {
@@ -87,23 +112,44 @@ public class Model {
                         timer.start();
                     }
                 }
+                case exit -> {
+                    if(!isNewGame) {
+                        GameSaving.saveGame(field, timer.getAlternateSeconds());
+                    }
+                    highScores.writeHighScores();
+                    System.exit(0);
+                }
                 default -> informer.showMessage("You can't use this command in game", MessageType.info);
 
             }
         }else{
             switch (command){
                 case newGame -> {
+                    new File("src/model/savedgame.txt").delete();
+                    if(arguments.size() != 0) {
+                        if(arguments.get(0) < 5 || arguments.get(0) > 30 ||
+                                arguments.get(1) < 5 || arguments.get(1) > 30 ||
+                                arguments.get(2) > arguments.get(0)*arguments.get(1) * 0.25){
+                            informer.showMessage("Read about newgame arguments in \"about\"", MessageType.info);
+                            break;
+                        }else {
+                            field = new Field(arguments.get(0), arguments.get(1), arguments.get(2));
+                        }
+                    }else{
+                        field = new Field();
+                    }
                     timer = new Timer(this);
                     pause = false;
                     isNewGame = true;
                     isGame = true;
-                    field = new Field();
-                    notifyView();
+                    notifyView(true);
                 }
-                case highScores -> {
-
-                }
+                case highScores -> informer.showMessage(MessageType.highScores, highScores.getHighScores());
                 case about -> informer.showMessage(informer.getAbout(), MessageType.info);
+                case exit -> {
+                    highScores.writeHighScores();
+                    System.exit(0);
+                }
             }
         }
     }

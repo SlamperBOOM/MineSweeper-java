@@ -3,6 +3,7 @@ package view.graphicView;
 import model.Commands;
 import model.Field;
 import model.Timer;
+import model.highscores.TableRow;
 import view.MessageType;
 import view.UserInterface;
 
@@ -32,8 +33,18 @@ public class WindowUI implements UserInterface {
     }
 
     @Override
+    public void setFieldSize(Field field) {
+
+    }
+
+    @Override
     public int showMessage(String message, MessageType type){
 
+        return 0;
+    }
+
+    @Override
+    public int showMessage(MessageType type, List<TableRow> scores) {
         return 0;
     }
 }

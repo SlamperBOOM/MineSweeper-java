@@ -30,8 +30,9 @@ public class Field {
         this.height = height;
         this.width = width;
         this.bombCount = bombCount;
+        setBombs = 0;
         for(int i=0; i<height*width; ++i){
-            field.add(new Plate());
+            field.add(new Plate(PlateState.CLOSED, false));
         }
         updated = true;
     }
@@ -40,7 +41,11 @@ public class Field {
         return bombCount;
     }
 
-    public int getEstimatedBombs() {
+    public void setEstimatedBombs(int bombs){
+        setBombs = bombCount - bombs;
+    }
+
+    public Integer getEstimatedBombs() {
         return bombCount - setBombs;
     }
 
@@ -71,7 +76,8 @@ public class Field {
                     if (setX == x && setY == y) {
                         continue;
                     }
-                    if (random.nextDouble() % 1 <= bombProbability && bombs < bombCount) {
+                    if (random.nextDouble(0, 1) <= bombProbability && bombs < bombCount
+                            && !field.get(y * width + x).isBomb()) {
                         field.get(y * width + x).setBomb(true);
                         bombs++;
                     }
@@ -85,7 +91,7 @@ public class Field {
                 int bombsAround = 0;
                 for(int index=0; index<8; ++index){
                     if(y + yShift[index] >= 0 && y + yShift[index] < height && x + xShift[index] >= 0 && x + xShift[index] < width &&
-                            field.get((y + yShift[index]) * height + x + xShift[index]).isBomb()){
+                            field.get((y + yShift[index]) * width + x + xShift[index]).isBomb()){
                         bombsAround++;
                     }
 
@@ -122,15 +128,15 @@ public class Field {
                 int flagsAround = 0;
                 for(int index=0; index<8; ++index) {
                     if(y + yShift[index] >= 0 && y + yShift[index] < height && x + xShift[index] >= 0 && x + xShift[index] < width &&
-                            field.get((y + yShift[index]) * height + x + xShift[index]).getState() == PlateState.FLAGGED){
+                            field.get((y + yShift[index]) * width + x + xShift[index]).getState() == PlateState.FLAGGED){
                         flagsAround++;
                     }
                 }
                 if(flagsAround == field.get(y * width + x).getBombsAround()){
                     for(int index=0; index<8; ++index) {
                         if(y + yShift[index] >= 0 && y + yShift[index] < height && x + xShift[index] >= 0 && x + xShift[index] < width &&
-                                field.get((y + yShift[index]) * height + x + xShift[index]).getState() != PlateState.FLAGGED &&
-                                field.get((y + yShift[index]) * height + x + xShift[index]).getState() != PlateState.OPENED){
+                                field.get((y + yShift[index]) * width + x + xShift[index]).getState() != PlateState.FLAGGED &&
+                                field.get((y + yShift[index]) * width + x + xShift[index]).getState() != PlateState.OPENED){
                             if(setPlate(x + xShift[index], y + yShift[index], PlateState.OPENED, false) == 1){
                                 return 1;
                             }

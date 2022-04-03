@@ -5,6 +5,7 @@ import model.Commands;
 import model.Field;
 import model.Model;
 import model.Timer;
+import model.highscores.TableRow;
 import view.MessageType;
 import view.View;
 import view.Subscriber;
@@ -37,6 +38,11 @@ public class GraphicView implements View, Subscriber{
     }
 
     @Override
+    public int showMessage(MessageType type, List<TableRow> scores) {
+        return 0;
+    }
+
+    @Override
     public void redrawField(Field field){
 
     }
@@ -47,7 +53,7 @@ public class GraphicView implements View, Subscriber{
     }
 
     @Override
-    public void notifyView(Model model){
+    public void notifyView(Model model, boolean isNewGame){
 
     }
 }

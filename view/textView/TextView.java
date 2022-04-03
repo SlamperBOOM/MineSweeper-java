@@ -5,6 +5,7 @@ import model.Commands;
 import model.Field;
 import model.Model;
 import model.Timer;
+import model.highscores.TableRow;
 import view.MessageType;
 import view.Subscriber;
 import view.View;
@@ -21,9 +22,12 @@ public class TextView implements View, Subscriber {
     }
 
     @Override
-    public void notifyView(Model model) {
+    public void notifyView(Model model, boolean isNewGame) {
         if(model.getField().isUpdated()) {
             redrawField(model.getField());
+        }
+        if(isNewGame){
+            gameConsole.setFieldSize(model.getField());
         }
         redrawTime(model.getTimer());
     }
@@ -41,6 +45,11 @@ public class TextView implements View, Subscriber {
     @Override
     public int showMessage(String message, MessageType type) {
         return gameConsole.showMessage(message, type);
+    }
+
+    @Override
+    public int showMessage(MessageType type, List<TableRow> scores) {
+        return gameConsole.showMessage(type, scores);
     }
 
     @Override

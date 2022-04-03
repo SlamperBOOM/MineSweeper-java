@@ -1,9 +1,14 @@
 package controller;
 
+import model.highscores.TableRow;
 import view.MessageType;
 
-public interface Informer {
-    public int showMessage(String message, MessageType type);
+import java.util.List;
 
-    public String getAbout();
+public interface Informer {
+    int showMessage(String message, MessageType type);
+
+    int showMessage(MessageType type, List<TableRow> scores);
+
+    String getAbout();
 }
