@@ -1,6 +1,7 @@
 package model;
 
 import controller.Informer;
+import model.about.About;
 import model.highscores.HighScores;
 import view.MessageType;
 import view.Subscriber;
@@ -14,6 +15,7 @@ public class Model {
     private Informer informer;
     private Timer timer;
     private HighScores highScores;
+    private About about;
     private boolean pause = true;
     private boolean isNewGame = true;
     private boolean isGame = false;
@@ -46,6 +48,10 @@ public class Model {
     public void setSubscriber(Subscriber view){
         subscriber = view;
         notifyView(false);
+    }
+
+    public void setAbout(About about){
+        this.about = about;
     }
 
     public void saveGame(){
@@ -160,7 +166,7 @@ public class Model {
                     notifyView(true);
                 }
                 case highScores -> informer.showMessage(MessageType.highScores, highScores.getHighScores());
-                case about -> informer.showMessage(informer.getAbout(), MessageType.info);
+                case about -> informer.showMessage(about.getAbout(), MessageType.info);
                 case exit -> {
                     highScores.writeHighScores();
                     System.exit(0);

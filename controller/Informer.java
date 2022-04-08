@@ -9,6 +9,4 @@ public interface Informer {
     int showMessage(String message, MessageType type);
 
     int showMessage(MessageType type, List<TableRow> scores);
-
-    String getAbout();
 }
