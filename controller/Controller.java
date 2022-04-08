@@ -21,9 +21,9 @@ public class Controller implements Informer{
     private About about;
 
     public Controller(){
-        view = new TextView(this);
+        view = new GraphicView(this);
         model = new Model((Subscriber) view, this);
-        about = new TextAbout();
+        about = new GraphicAbout();
     }
 
     public void init(){
@@ -36,7 +36,21 @@ public class Controller implements Informer{
     }
 
     public void processCommand(Commands command, List<Integer> arguments){
-        model.processCommand(command, arguments);
+        if(command == Commands.switchMode){
+            model.saveGame();
+            if(arguments.get(0) == 1) {
+                view = new GraphicView(this);
+                model.setSubscriber((Subscriber) view);
+                about = new GraphicAbout();
+            }else{
+                view = new TextView(this);
+                model.setSubscriber((Subscriber) view);
+                about = new TextAbout();
+            }
+            model.loadGame();
+        }else {
+            model.processCommand(command, arguments);
+        }
     }
 
     @Override

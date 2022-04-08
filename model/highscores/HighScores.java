@@ -45,6 +45,7 @@ public class HighScores {
     }
 
     public List<TableRow> getHighScores(){
+        scores.sort(new TableRowComparator());
          return scores;
     }
 }

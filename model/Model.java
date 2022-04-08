@@ -43,6 +43,20 @@ public class Model {
         subscriber.notifyView(this, isNewGame);
     }
 
+    public void setSubscriber(Subscriber view){
+        subscriber = view;
+        notifyView(false);
+    }
+
+    public void saveGame(){
+        if(timer == null){
+            GameSaving.saveGame(field, 0);
+        }else{
+            GameSaving.saveGame(field, timer.getMilliseconds());
+        }
+
+    }
+
     public void loadGame(){
         field = GameSaving.loadGame(this);
         timer = new Timer(this, seconds);
@@ -50,7 +64,7 @@ public class Model {
         isNewGame = false;
         isGame = true;
         timer.start();
-        notifyView(false);
+        notifyView(true);
     }
 
     public void processCommand(Commands command, List<Integer> arguments){
@@ -83,6 +97,7 @@ public class Model {
                     }
                     int status = setPlate(arguments.get(0) - 1, arguments.get(1) - 1, arguments.get(2));
                     if (status == 1) {
+                        new File("src/model/savedgame.txt").delete();
                         field.openField();
                         processCommand(Commands.pause, arguments);
                         isGame = false;
@@ -101,7 +116,7 @@ public class Model {
                 case pause -> {
                     if(!pause) {
                         pause = true;
-                        seconds = timer.getAlternateSeconds();
+                        seconds = timer.getMilliseconds();
                         timer.setStopped();
                     }
                 }
@@ -114,7 +129,7 @@ public class Model {
                 }
                 case exit -> {
                     if(!isNewGame) {
-                        GameSaving.saveGame(field, timer.getAlternateSeconds());
+                        saveGame();
                     }
                     highScores.writeHighScores();
                     System.exit(0);
@@ -157,9 +172,18 @@ public class Model {
     private int setPlate(int x, int y, int status){
         if(!pause) {
             switch (status){
-                case 0, 3 -> {return field.setPlate(x, y, PlateState.CLOSED, false);}
-                case 1 -> {return field.setPlate(x, y, PlateState.OPENED, false);}
-                case 2 -> {return field.setPlate(x, y, PlateState.FLAGGED, false);}
+                case 0 -> {return field.setPlate(x, y, PlateState.CLOSED, false);}
+                case 1 -> {
+                    if(field.getPlates().get(y * field.getWidth() + x).getState() != PlateState.FLAGGED)
+                    return field.setPlate(x, y, PlateState.OPENED, false);
+                }
+                case 2 -> {
+                    if(field.getPlates().get(y * field.getWidth() + x).getState() == PlateState.FLAGGED) {
+                        return field.setPlate(x, y, PlateState.CLOSED, false);
+                    }else{
+                        return field.setPlate(x, y, PlateState.FLAGGED, false);
+                    }
+                }
             }
         }
         return 0;

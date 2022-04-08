@@ -71,7 +71,7 @@ public class ConsoleUI extends Thread implements UserInterface, DocumentListener
         panel.add(userCommandArea, BorderLayout.SOUTH);
 
         console.setContentPane(panel);
-        console.setBounds(20, 20, 400, 300);
+        console.setBounds(50, 50, 400, 300);
         console.setResizable(false);
         console.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         console.addWindowListener(new WindowAdapter() {
@@ -101,10 +101,9 @@ public class ConsoleUI extends Thread implements UserInterface, DocumentListener
                         int bombsAround = plateList.get(y*width + x).getBombsAround();
                         if(plateList.get(y*width + x).isBomb()){
                             fieldLine.append("\u24B7");
-                        }else if(bombsAround == 0){
-                            fieldLine.append("\u2B1C");
-                        } else {
+                        }else {
                             switch (bombsAround){
+                                case 0 -> fieldLine.append("\u2B1C");
                                 case 1 -> fieldLine.append("\u2460");
                                 case 2 -> fieldLine.append("\u2461");
                                 case 3 -> fieldLine.append("\u2462");
@@ -188,6 +187,11 @@ public class ConsoleUI extends Thread implements UserInterface, DocumentListener
             case "about" -> view.sendCommand(Commands.about, arguments);
             case "highscores" -> view.sendCommand(Commands.highScores, arguments);
             case "exit" -> view.sendCommand(Commands.exit, arguments);
+            case "switchmode" -> {
+                arguments.add(1);
+                view.sendCommand(Commands.switchMode, arguments);
+                console.dispose();
+            }
             default -> {
                 if(splitedCommand.length < 3){
                     showMessage("Wrong command", MessageType.info);
@@ -202,15 +206,13 @@ public class ConsoleUI extends Thread implements UserInterface, DocumentListener
                 switch (splitedCommand[2]) {
                     case "f":
                     case "flag":
+                    case "uf":
+                    case "unflag":
                         arguments.add(2);
                         break;
                     case "o":
                     case "open":
                         arguments.add(1);
-                        break;
-                    case "uf":
-                    case "unflag":
-                        arguments.add(3);
                         break;
                     default:
                         showMessage("Wrong command", MessageType.info);

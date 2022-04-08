@@ -4,22 +4,19 @@ public class GraphicAbout implements About{
     String newGameDescription;
     String highScoresDescription;
     String pauseDescription;
-    String setPlateDescription;
 
     public GraphicAbout(){
-        newGameDescription = "newgame *width* *height* *bombcount*: use this command to start new game. " +
-                "You also can use newgame without arguments to choose default field";
-        highScoresDescription = "highscores: shows available highscores";
-        pauseDescription = "pause/unpause: pausing/unpausing the game";
-        setPlateDescription = "*x* *y* *open/flag/unflag*: sets a plate on field in specified status(opened, flagged, closed)";
+        newGameDescription = "New Game: opens dialog window where you can set parameters for new game. " +
+        "You can also leave fields empty to start default game.";
+        highScoresDescription = "High Scores: shows available highscores";
+        pauseDescription = "Pause/Continue: pausing/continuing the game";
     }
     @Override
     public String getAbout() {
         String message = "";
         message += "In game commands:\n  ";
         message += newGameDescription + "\n  " +
-                pauseDescription + "\n  " +
-                setPlateDescription + "\n";
+                pauseDescription + "\n";
         message += "Not in game commands:\n  ";
         message += highScoresDescription;
         return message;

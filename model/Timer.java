@@ -34,7 +34,7 @@ public class Timer extends Thread{
         stopFlag = false;
     }
 
-    public long getAlternateSeconds(){
+    public long getMilliseconds(){
         return seconds;
     }
 

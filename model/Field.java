@@ -72,8 +72,19 @@ public class Field {
         Random random = new Random();
         while(bombs < bombCount) {
             for (int y = 0; y < height; ++y) {
-                for(int x=0; x<width; ++x) {
+                for(int x=0; x< width; ++x) {
                     if (setX == x && setY == y) {
+                        continue;
+                    }
+                    boolean checkAround = false;
+                    for(int index=0; index < 8; ++index){
+                        if(y + yShift[index] >= 0 && y + yShift[index] < height && x + xShift[index] >= 0 && x + xShift[index] < width &&
+                                y + yShift[index] == setY && x + xShift[index] == setX){
+                            checkAround = true;
+                            break;
+                        }
+                    }
+                    if(checkAround){
                         continue;
                     }
                     if (random.nextDouble(0, 1) <= bombProbability && bombs < bombCount

@@ -8,8 +8,8 @@ import java.util.List;
 
 public class HighScoresDialog {
 
-    public static void showDialog(List<TableRow> scores, JFrame console){
-        JDialog dialog = new JDialog(console);
+    public static void showDialog(List<TableRow> scores, JFrame parent){
+        JDialog dialog = new JDialog(parent, true);
         JPanel table = new JPanel(new GridLayout(16, 4));
         table.setVisible(true);
         Font head = new Font("TimesRoman", Font.BOLD, 15);
@@ -75,7 +75,7 @@ public class HighScoresDialog {
         main.setVisible(true);
         dialog.setContentPane(main);
         dialog.setTitle("High Scores");
-        dialog.setBounds(console.getX() + 20, console.getY() + 20, 300, 500);
+        dialog.setBounds(parent.getX() + 20, parent.getY() + 20, 300, 500);
         dialog.setResizable(false);
         dialog.setVisible(true);
     }
