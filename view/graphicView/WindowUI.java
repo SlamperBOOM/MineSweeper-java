@@ -7,6 +7,7 @@ import model.Timer;
 import model.highscores.TableRow;
 import view.HighScoresDialog;
 import view.MessageType;
+import view.SetModeDialog;
 import view.UserInterface;
 
 import javax.imageio.ImageIO;
@@ -55,35 +56,36 @@ public class WindowUI implements UserInterface, ActionListener {
 
         BufferedImage image = null;
         try {
-            image = ImageIO.read(new File("src/view/graphicView/recources/facingDown.png"));
+            image = ImageIO.read(this.getClass().getResourceAsStream("resources/facingDown.png"));
             closedIcon = image.getScaledInstance(30, 30, Image.SCALE_SMOOTH);
-            image = ImageIO.read(new File("src/view/graphicView/recources/bomb.png"));
+            image = ImageIO.read(this.getClass().getResourceAsStream("resources/bomb.png"));
             bombIcon = image.getScaledInstance(30, 30, Image.SCALE_SMOOTH);
-            image = ImageIO.read(new File("src/view/graphicView/recources/zero.png"));
+            image = ImageIO.read(this.getClass().getResourceAsStream("resources/zero.png"));
             openedIcon = image.getScaledInstance(30, 30, Image.SCALE_SMOOTH);
-            image = ImageIO.read(new File("src/view/graphicView/recources/flagged.png"));
+            image = ImageIO.read(this.getClass().getResourceAsStream("resources/flagged.png"));
             flagIcon = image.getScaledInstance(30, 30, Image.SCALE_SMOOTH);
             flagSwitchIcon = image.getScaledInstance(25, 25, Image.SCALE_SMOOTH);
-            image = ImageIO.read(new File("src/view/graphicView/recources/flaggedTransparent.png"));
+            image = ImageIO.read(this.getClass().getResourceAsStream("resources/flaggedTransparent.png"));
             flagSwitchTransparentIcon = image.getScaledInstance(25, 25, Image.SCALE_SMOOTH);
-            image = ImageIO.read(new File("src/view/graphicView/recources/1.png"));
+            image = ImageIO.read(this.getClass().getResourceAsStream("resources/1.png"));
             oneIcon = image.getScaledInstance(30, 30, Image.SCALE_SMOOTH);
-            image = ImageIO.read(new File("src/view/graphicView/recources/2.png"));
+            image = ImageIO.read(this.getClass().getResourceAsStream("resources/2.png"));
             twoIcon = image.getScaledInstance(30, 30, Image.SCALE_SMOOTH);
-            image = ImageIO.read(new File("src/view/graphicView/recources/3.png"));
+            image = ImageIO.read(this.getClass().getResourceAsStream("resources/3.png"));
             threeIcon = image.getScaledInstance(30, 30, Image.SCALE_SMOOTH);
-            image = ImageIO.read(new File("src/view/graphicView/recources/4.png"));
+            image = ImageIO.read(this.getClass().getResourceAsStream("resources/4.png"));
             fourIcon = image.getScaledInstance(30, 30, Image.SCALE_SMOOTH);
-            image = ImageIO.read(new File("src/view/graphicView/recources/5.png"));
+            image = ImageIO.read(this.getClass().getResourceAsStream("resources/5.png"));
             fiveIcon = image.getScaledInstance(30, 30, Image.SCALE_SMOOTH);
-            image = ImageIO.read(new File("src/view/graphicView/recources/6.png"));
+            image = ImageIO.read(this.getClass().getResourceAsStream("resources/6.png"));
             sixIcon = image.getScaledInstance(30, 30, Image.SCALE_SMOOTH);
-            image = ImageIO.read(new File("src/view/graphicView/recources/7.png"));
+            image = ImageIO.read(this.getClass().getResourceAsStream("resources/7.png"));
             sevenIcon = image.getScaledInstance(30, 30, Image.SCALE_SMOOTH);
-            image = ImageIO.read(new File("src/view/graphicView/recources/8.png"));
+            image = ImageIO.read(this.getClass().getResourceAsStream("resources/8.png"));
             eightIcon = image.getScaledInstance(30, 30, Image.SCALE_SMOOTH);
         }catch (IOException e){
-            showMessage("Cannot find images, please try another mode", MessageType.info);
+            showMessage("Cannot find images, please try again", MessageType.info);
+            window.dispose();
         }
 
         timeArea = new JTextField(3);
@@ -193,6 +195,11 @@ public class WindowUI implements UserInterface, ActionListener {
         return game;
     }
 
+    public void setMode(){
+        SetModeDialog dialog = new SetModeDialog(window, this);
+        dialog.showDialog();
+    }
+
     @Override
     public void sendCommand(String command){
         String[] splitedLine = command.split(" ");
@@ -213,6 +220,15 @@ public class WindowUI implements UserInterface, ActionListener {
                 arguments.add(0);
                 view.sendCommand(Commands.switchMode, arguments);
                 window.dispose();
+            }
+            case "initialize" ->{
+                arguments.add(Integer.parseInt(splitedLine[1]));
+                arguments.add(0);//uses to identify loading game right after init
+                if(arguments.get(0) == 0) {
+                    view.sendCommand(Commands.switchMode, arguments);
+                    window.dispose();
+                }
+                view.init();
             }
             case "click" -> {
                 arguments.add(Integer.parseInt(splitedLine[1]));

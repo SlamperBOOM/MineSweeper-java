@@ -38,6 +38,16 @@ public class TextView implements View, Subscriber {
     }
 
     @Override
+    public void setMode() {
+        //nothing, because initially we create graphic view and call this method from there
+    }
+
+    @Override
+    public void init() {
+        controller.init();
+    }
+
+    @Override
     public void sendCommand(Commands command, List<Integer> arguments) {
        controller.processCommand(command, arguments);
     }

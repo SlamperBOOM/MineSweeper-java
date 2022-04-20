@@ -18,8 +18,18 @@ public class GraphicView implements View, Subscriber{
     private Controller controller;
 
     public GraphicView(Controller controller){
-        gameWindow = new WindowUI(this);
         this.controller = controller;
+        gameWindow = new WindowUI(this);
+    }
+
+    @Override
+    public void setMode(){
+        gameWindow.setMode();
+    }
+
+    @Override
+    public void init() {
+        controller.init();
     }
 
     @Override

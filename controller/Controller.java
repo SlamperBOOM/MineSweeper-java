@@ -6,6 +6,7 @@ import model.about.TextAbout;
 import model.Commands;
 import model.highscores.TableRow;
 import view.MessageType;
+import view.SetModeDialog;
 import view.Subscriber;
 import view.View;
 import view.graphicView.GraphicView;
@@ -23,6 +24,7 @@ public class Controller implements Informer{
         view = new GraphicView(this);
         model = new Model((Subscriber) view, this);
         model.setAbout(new GraphicAbout());
+        view.setMode();
     }
 
     public void init(){
@@ -36,7 +38,9 @@ public class Controller implements Informer{
 
     public void processCommand(Commands command, List<Integer> arguments){
         if(command == Commands.switchMode){
-            model.saveGame();
+            if(arguments.size() == 1) {
+                model.saveGame();
+            }
             if(arguments.get(0) == 1) {
                 view = new GraphicView(this);
                 model.setSubscriber((Subscriber) view);
@@ -46,7 +50,9 @@ public class Controller implements Informer{
                 model.setSubscriber((Subscriber) view);
                 model.setAbout(new TextAbout());
             }
-            model.loadGame();
+            if(arguments.size() == 1) {
+                model.loadGame();
+            }
         }else {
             model.processCommand(command, arguments);
         }
