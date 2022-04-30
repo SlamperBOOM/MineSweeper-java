@@ -10,87 +10,39 @@ import view.MessageType;
 import view.UserInterface;
 
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import java.awt.*;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.List;
 
 
-public class ConsoleUI extends Thread implements UserInterface, DocumentListener {
-
-    private JTextArea fieldArea;
-    private JTextField timeArea;
-    private JTextField bombCountArea;
-    private JTextArea userCommandArea;
-    private JPanel panel;
-    private JFrame console;
-    private JPanel topPanel;
+public class ConsoleUI implements UserInterface {
+    private StringBuilder timeArea;
+    private int bombCount;
+    private StringBuilder fieldArea = new StringBuilder();
+    private InputThread inputThread;
 
     private TextView view;
 
     public ConsoleUI(TextView view){
         this.view = view;
-        console = new JFrame("MineSweeper");
+        inputThread = new InputThread(this);
+    }
 
-        timeArea = new JTextField(10);
-        timeArea.setBackground(Color.LIGHT_GRAY);
-        timeArea.setFont(new Font("TimesRoman", Font.BOLD, 12));
-        timeArea.setEditable(false);
-        timeArea.setVisible(true);
+    private void drawGameField(){
+        String gameView = bombCount + " " +
+                timeArea + "\n" +
+                fieldArea + "\n";
+        System.out.print(gameView);
+    }
 
-        bombCountArea = new JTextField(10);
-        bombCountArea.setBackground(Color.LIGHT_GRAY);
-        bombCountArea.setFont(new Font("TimesRoman", Font.BOLD, 12));
-        bombCountArea.setEditable(false);
-        bombCountArea.setVisible(true);
-
-        topPanel = new JPanel();
-        topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.X_AXIS));
-        topPanel.add(bombCountArea);
-        topPanel.add(timeArea);
-
-        fieldArea = new JTextArea( 10, 10);
-        fieldArea.setFont(new Font("TimesRoman", Font.BOLD, 18));
-        fieldArea.setEditable(false);
-        fieldArea.setVisible(true);
-
-        userCommandArea = new JTextArea(1,20);
-        userCommandArea.setBackground(Color.LIGHT_GRAY);
-        userCommandArea.setFont(new Font("TimesRoman", Font.PLAIN, 15));
-        userCommandArea.setEditable(true);
-        userCommandArea.setVisible(true);
-        userCommandArea.getDocument().addDocumentListener(this);
-
-        panel = new JPanel();
-        panel.setLayout(new BorderLayout());
-        panel.add(topPanel, BorderLayout.NORTH);
-        panel.add(fieldArea, BorderLayout.CENTER);
-        panel.add(userCommandArea, BorderLayout.SOUTH);
-
-        console.setContentPane(panel);
-        console.setBounds(50, 50, 400, 300);
-        console.setResizable(false);
-        console.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        console.addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                view.sendCommand(Commands.exit, new ArrayList<>());
-                super.windowClosing(e);
-            }
-        });
-        console.pack();
-        console.setVisible(true);
+    private void drawMessage(String message){
+        System.out.print(message + "\n");
     }
 
     @Override
     public void drawField(Field field){
         int width = field.getWidth();
         int height = field.getHeight();
-        fieldArea.setCaretPosition(0);
-        bombCountArea.setText(field.getEstimatedBombs().toString());
+        bombCount = field.getEstimatedBombs();
         List<Plate> plateList = field.getPlates();
         StringBuilder fieldLine = new StringBuilder();
         for(int y=0;y<height;++y){
@@ -122,38 +74,43 @@ public class ConsoleUI extends Thread implements UserInterface, DocumentListener
                 fieldLine.append("\n");
             }
         }
-        fieldArea.setText(fieldLine.toString());
+        fieldArea = fieldLine;
+        drawGameField();
     }
 
     @Override
     public void drawTime(Timer timer) {
         if(timer == null) {
-            timeArea.setText("0 sec.");
+            timeArea = new StringBuilder("0 sec.");
         } else {
-            timeArea.setText(timer.getSeconds() + " sec.");
+            timeArea = new StringBuilder(timer.getSeconds() + " sec.");
         }
-    }
-
-    @Override
-    public void setFieldSize(Field field) {
-        fieldArea.setRows(field.getHeight());
-        fieldArea.setColumns(field.getWidth());
-        console.pack();
     }
 
     @Override
     public int showMessage(String message, MessageType type){
         if(type == MessageType.info) {
-            JOptionPane.showMessageDialog(console, message, "Info", JOptionPane.INFORMATION_MESSAGE);
+            drawMessage(message);
             return 0;
         }else{
-            return JOptionPane.showConfirmDialog(console, message, "Confirm", JOptionPane.YES_NO_CANCEL_OPTION);
+            drawMessage(message + "(yes/no)");
+            String option;
+            while(true){
+                option = inputThread.read();
+                if(option.equals("y") || option.equals("yes")){
+                    return 0;
+                } else if(option.equals("n") || option.equals("no")){
+                    return 1;
+                } else{
+                    showMessage("Choose yes/no (y/n)", MessageType.info);
+                }
+            }
         }
     }
 
     @Override
     public int showMessage(MessageType type, List<TableRow> scores) {
-        HighScoresDialog.showDialog(scores, console);
+        HighScoresDialog.showDialog(scores, new JFrame());
         return 0;
     }
 
@@ -161,7 +118,6 @@ public class ConsoleUI extends Thread implements UserInterface, DocumentListener
     public void sendCommand(String command){
         List<Integer> arguments;
         arguments = new ArrayList<>();
-        command = command.substring(0, command.length() - 1);
         command = command.toLowerCase();
         String[] splitedCommand = command.split(" ");
         switch1:
@@ -182,7 +138,10 @@ public class ConsoleUI extends Thread implements UserInterface, DocumentListener
                     showMessage("Add more arguments or use \"newgame\" instead", MessageType.info);
                 }
             }
-            case "pause" -> view.sendCommand(Commands.pause, arguments);
+            case "pause" -> {
+                view.sendCommand(Commands.pause, arguments);
+                drawGameField();
+            }
             case "unpause" -> view.sendCommand(Commands.unPause, arguments);
             case "about" -> view.sendCommand(Commands.about, arguments);
             case "highscores" -> view.sendCommand(Commands.highScores, arguments);
@@ -190,7 +149,7 @@ public class ConsoleUI extends Thread implements UserInterface, DocumentListener
             case "switchmode" -> {
                 arguments.add(1);
                 view.sendCommand(Commands.switchMode, arguments);
-                console.dispose();
+                inputThread.stop();
             }
             default -> {
                 if(splitedCommand.length < 3){
@@ -223,24 +182,7 @@ public class ConsoleUI extends Thread implements UserInterface, DocumentListener
         }
     }
 
-    @Override
-    public void insertUpdate(DocumentEvent e) {
-        String command = userCommandArea.getText();
-        char[] charCommand = command.toCharArray();
-        if(charCommand[command.length() - 1] == '\n') {
-            sendCommand(command);
-            SwingUtilities.invokeLater(() -> userCommandArea.setText(""));
-        }
-
-    }
-
-    @Override
-    public void removeUpdate(DocumentEvent e) {
-        //nothing
-    }
-
-    @Override
-    public void changedUpdate(DocumentEvent e) {
-        //nothing
+    public void input(){
+        inputThread.start();
     }
 }

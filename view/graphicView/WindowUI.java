@@ -15,7 +15,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +30,7 @@ public class WindowUI implements UserInterface, ActionListener {
     private JButton flagSwitch;
     private JPanel fieldArea;
     private JButton[] fieldPlates;
-    private JMenuBar menu;
+    private GameMenu menu;
 
     private Image closedIcon;
     private Image openedIcon;
@@ -54,6 +53,38 @@ public class WindowUI implements UserInterface, ActionListener {
         this.view = view;
         window = new JFrame("MineSweeper");
 
+        readImages();
+
+        createEnvironment();
+
+        createField();
+
+        contentPane = new JPanel(new BorderLayout());
+        contentPane.add(topPanel, BorderLayout.NORTH);
+        contentPane.add(fieldArea, BorderLayout.CENTER);
+        contentPane.setVisible(true);
+
+        menu = new GameMenu(this);
+        menu.createMenu();
+
+        window.setJMenuBar(menu.getMenuBar());
+        window.setContentPane(contentPane);
+        window.setBounds(50, 50, 0, 0);
+        window.pack();
+        window.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        window.setResizable(false);
+        window.setVisible(true);
+
+        window.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                view.sendCommand(Commands.exit, new ArrayList<>());
+                super.windowClosing(e);
+            }
+        });
+    }
+
+    private void readImages(){
         BufferedImage image = null;
         try {
             image = ImageIO.read(this.getClass().getResourceAsStream("resources/facingDown.png"));
@@ -87,7 +118,9 @@ public class WindowUI implements UserInterface, ActionListener {
             showMessage("Cannot find images, please try again", MessageType.info);
             window.dispose();
         }
+    }
 
+    private void createEnvironment(){
         timeArea = new JTextField(3);
         timeArea.setBackground(Color.LIGHT_GRAY);
         timeArea.setFont(new Font("TimesRoman", Font.BOLD, 12));
@@ -112,7 +145,9 @@ public class WindowUI implements UserInterface, ActionListener {
         topPanel.add(bombCountArea);
         topPanel.add(flagSwitch);
         topPanel.add(timeArea);
+    }
 
+    private void createField(){
         fieldArea = new JPanel(new GridLayout(9, 9, 0, 0));
         fieldPlates = new JButton[9*9];
         for(int i = 0; i < 9; ++i){
@@ -126,73 +161,6 @@ public class WindowUI implements UserInterface, ActionListener {
                 fieldArea.add(fieldPlates[i * 9 + j]);
             }
         }
-        contentPane = new JPanel(new BorderLayout());
-        contentPane.add(topPanel, BorderLayout.NORTH);
-        contentPane.add(fieldArea, BorderLayout.CENTER);
-        contentPane.setVisible(true);
-
-        menu = new JMenuBar();
-        menu.add(createGameMenu());
-        menu.setVisible(true);
-
-        window.setJMenuBar(menu);
-        window.setContentPane(contentPane);
-        window.setBounds(50, 50, 0, 0);
-        window.pack();
-        window.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        window.setResizable(false);
-        window.setVisible(true);
-
-        window.addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                view.sendCommand(Commands.exit, new ArrayList<>());
-                super.windowClosing(e);
-            }
-        });
-    }
-
-    public JMenu createGameMenu(){
-        JMenu game = new JMenu("Game");
-
-        JMenuItem newGame = new JMenuItem("New game");
-        newGame.addActionListener(this);
-        newGame.setActionCommand("createNewGame");
-        game.add(newGame);
-
-        JMenuItem pause = new JMenuItem("Pause");
-        pause.setActionCommand("pause");
-        pause.addActionListener(this);
-        game.add(pause);
-
-        JMenuItem unpause = new JMenuItem("Continue");
-        unpause.setActionCommand("unpause");
-        unpause.addActionListener(this);
-        game.add(unpause);
-
-        JMenuItem highScores = new JMenuItem("High Scores");
-        highScores.addActionListener(this);
-        highScores.setActionCommand("highscores");
-        game.add(highScores);
-
-        JMenuItem about = new JMenuItem("About");
-        about.setActionCommand("about");
-        about.addActionListener(this);
-        game.add(about);
-
-        JMenuItem switchMode = new JMenuItem("Switch Mode");
-        switchMode.setActionCommand("switchmode");
-        switchMode.addActionListener(this);
-        game.add(switchMode);
-
-        game.addSeparator();
-
-        JMenuItem exit = new JMenuItem("Exit");
-        exit.setActionCommand("exit");
-        exit.addActionListener(this);
-        game.add(exit);
-
-        return game;
     }
 
     public void setMode(){
@@ -223,12 +191,10 @@ public class WindowUI implements UserInterface, ActionListener {
             }
             case "initialize" ->{
                 arguments.add(Integer.parseInt(splitedLine[1]));
-                arguments.add(0);//uses to identify loading game right after init
                 if(arguments.get(0) == 0) {
-                    view.sendCommand(Commands.switchMode, arguments);
+                    view.sendCommand(Commands.initialize, arguments);
                     window.dispose();
                 }
-                view.init();
             }
             case "click" -> {
                 arguments.add(Integer.parseInt(splitedLine[1]));
@@ -283,7 +249,6 @@ public class WindowUI implements UserInterface, ActionListener {
         }
     }
 
-    @Override
     public void setFieldSize(Field field) {
         int height = field.getHeight();
         int width = field.getWidth();
@@ -337,6 +302,12 @@ public class WindowUI implements UserInterface, ActionListener {
                     flagSwitch.setIcon(new ImageIcon((flagSwitchIcon)));
                     flagState = true;
                 }
+            }
+            case "pause", "unpause" -> {
+                menu.switchPauseContinue();
+                window.setJMenuBar(menu.getMenuBar());
+
+                sendCommand(e.getActionCommand());
             }
             default -> sendCommand(e.getActionCommand());
         }

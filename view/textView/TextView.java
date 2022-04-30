@@ -23,13 +23,10 @@ public class TextView implements View, Subscriber {
 
     @Override
     public void notifyView(Model model, boolean isNewGame) {
-        if(model.getField().isUpdated()) {
+        redrawTime(model.getTimer());
+        if(isNewGame || model.getField().isUpdated() ){
             redrawField(model.getField());
         }
-        if(isNewGame){
-            gameConsole.setFieldSize(model.getField());
-        }
-        redrawTime(model.getTimer());
     }
 
     @Override
@@ -44,7 +41,7 @@ public class TextView implements View, Subscriber {
 
     @Override
     public void init() {
-        controller.init();
+        gameConsole.input();
     }
 
     @Override

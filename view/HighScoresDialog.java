@@ -7,7 +7,6 @@ import java.awt.*;
 import java.util.List;
 
 public class HighScoresDialog {
-
     public static void showDialog(List<TableRow> scores, JFrame parent){
         JDialog dialog = new JDialog(parent, true);
         JPanel table = new JPanel(new GridLayout(16, 4));

@@ -8,5 +8,6 @@ public enum Commands {
     highScores,
     about,
     exit,
-    switchMode
+    switchMode,
+    initialize
 }

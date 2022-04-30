@@ -17,6 +17,4 @@ public interface UserInterface {
     void drawField(Field field);
 
     void drawTime(Timer timer);
-
-    void setFieldSize(Field field);
 }

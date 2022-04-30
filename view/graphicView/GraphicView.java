@@ -29,7 +29,7 @@ public class GraphicView implements View, Subscriber{
 
     @Override
     public void init() {
-        controller.init();
+        //controller.init();
     }
 
     @Override

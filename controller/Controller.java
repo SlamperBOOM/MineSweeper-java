@@ -1,12 +1,10 @@
 package controller;
 
-import model.about.About;
 import model.about.GraphicAbout;
 import model.about.TextAbout;
 import model.Commands;
 import model.highscores.TableRow;
 import view.MessageType;
-import view.SetModeDialog;
 import view.Subscriber;
 import view.View;
 import view.graphicView.GraphicView;
@@ -25,6 +23,7 @@ public class Controller implements Informer{
         model = new Model((Subscriber) view, this);
         model.setAbout(new GraphicAbout());
         view.setMode();
+        init();
     }
 
     public void init(){
@@ -34,6 +33,7 @@ public class Controller implements Informer{
                 model.loadGame();
             }
         }
+        view.init();
     }
 
     public void processCommand(Commands command, List<Integer> arguments){
@@ -49,11 +49,22 @@ public class Controller implements Informer{
                 view = new TextView(this);
                 model.setSubscriber((Subscriber) view);
                 model.setAbout(new TextAbout());
+                view.init();
             }
             if(arguments.size() == 1) {
                 model.loadGame();
             }
-        }else {
+        }else if(command == Commands.initialize){
+            if(arguments.get(0) == 1){
+                view = new GraphicView(this);
+                model.setSubscriber((Subscriber) view);
+                model.setAbout(new GraphicAbout());
+            }else{
+                view = new TextView(this);
+                model.setSubscriber((Subscriber) view);
+                model.setAbout(new TextAbout());
+            }
+        } else {
             model.processCommand(command, arguments);
         }
     }

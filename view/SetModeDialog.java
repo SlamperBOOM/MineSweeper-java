@@ -54,7 +54,8 @@ public class SetModeDialog implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         ActionEvent e1 = new ActionEvent(e, 0, "initialize " + e.getActionCommand());
-        SwingUtilities.invokeLater(()-> ui.actionPerformed(e1));
+        //SwingUtilities.invokeLater(()-> );
+        ui.actionPerformed(e1);
         dialog.setVisible(false);
     }
 }
