@@ -7,6 +7,7 @@ public class GameMenu {
     private JMenu menu;
     private JMenuItem newGame;
     private JMenuItem pause;
+    private JMenuItem unpause;
     private JMenuItem highScores;
     private JMenuItem about;
     private JMenuItem switchMode;
@@ -27,10 +28,8 @@ public class GameMenu {
         pause = createItem("Pause", "pause");
         menu.add(pause);
 
-        /*JMenuItem unpause = new JMenuItem("Continue");
-        unpause.setActionCommand("unpause");
-        unpause.addActionListener(ui);
-        game.add(unpause);*/
+        unpause = createItem("Continue", "unpause");
+        menu.add(unpause);
 
         highScores = createItem("High scores", "highscores");
         menu.add(highScores);
@@ -52,15 +51,6 @@ public class GameMenu {
         menuBar.add(menu);
         menuBar.setVisible(true);
         return menuBar;
-    }
-
-    public void switchPauseContinue(){
-        if(pause.getActionCommand().equals("pause")){
-            pause = createItem("Continue", "unpause");
-        }else{
-            pause = createItem("Pause", "pause");
-        }
-        menu.updateUI();
     }
 
     private JMenuItem createItem(String name, String command){

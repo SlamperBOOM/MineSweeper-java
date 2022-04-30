@@ -303,12 +303,6 @@ public class WindowUI implements UserInterface, ActionListener {
                     flagState = true;
                 }
             }
-            case "pause", "unpause" -> {
-                menu.switchPauseContinue();
-                window.setJMenuBar(menu.getMenuBar());
-
-                sendCommand(e.getActionCommand());
-            }
             default -> sendCommand(e.getActionCommand());
         }
     }
