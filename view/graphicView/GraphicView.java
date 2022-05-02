@@ -28,9 +28,7 @@ public class GraphicView implements View, Subscriber{
     }
 
     @Override
-    public void init() {
-        //controller.init();
-    }
+    public void init() {}
 
     @Override
     public Field getField(Model model){
@@ -63,13 +61,15 @@ public class GraphicView implements View, Subscriber{
     }
 
     @Override
-    public void notifyView(Model model, boolean isNewGame){
+    public void notifyView(Model model, boolean isNewGame, boolean isTime){
         if(isNewGame){
             gameWindow.setFieldSize(model.getField());
         }
         if(model.getField().isUpdated()) {
             redrawField(model.getField());
         }
-        redrawTime(model.getTimer());
+        if(isTime) {
+            redrawTime(model.getTimer());
+        }
     }
 }

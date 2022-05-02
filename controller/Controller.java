@@ -30,7 +30,7 @@ public class Controller implements Informer{
         File save = new File("src/model/savedgame.txt");
         if(save.exists()) {
             if (showMessage("Do you want to continue?", MessageType.yesNo) == 0) {
-                model.loadGame();
+                model.loadGame(false);
             }
         }
         view.init();
@@ -38,9 +38,7 @@ public class Controller implements Informer{
 
     public void processCommand(Commands command, List<Integer> arguments){
         if(command == Commands.switchMode){
-            if(arguments.size() == 1) {
-                model.saveGame();
-            }
+            model.saveGame();
             if(arguments.get(0) == 1) {
                 view = new GraphicView(this);
                 model.setSubscriber((Subscriber) view);
@@ -51,9 +49,7 @@ public class Controller implements Informer{
                 model.setAbout(new TextAbout());
                 view.init();
             }
-            if(arguments.size() == 1) {
-                model.loadGame();
-            }
+            model.loadGame(true);
         }else if(command == Commands.initialize){
             if(arguments.get(0) == 1){
                 view = new GraphicView(this);

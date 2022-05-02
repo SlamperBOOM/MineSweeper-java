@@ -22,9 +22,10 @@ public class TextView implements View, Subscriber {
     }
 
     @Override
-    public void notifyView(Model model, boolean isNewGame) {
-        redrawTime(model.getTimer());
-        if(isNewGame || model.getField().isUpdated() ){
+    public void notifyView(Model model, boolean isNewGame, boolean isTime) {
+        if(isTime) {
+            redrawTime(model.getTimer());
+        }else if(isNewGame || model.getField().isUpdated() ){
             redrawField(model.getField());
         }
     }

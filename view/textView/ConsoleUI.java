@@ -5,11 +5,9 @@ import model.Field;
 import model.Plate;
 import model.Timer;
 import model.highscores.TableRow;
-import view.HighScoresDialog;
 import view.MessageType;
 import view.UserInterface;
 
-import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,7 +29,7 @@ public class ConsoleUI implements UserInterface {
         String gameView = bombCount + " " +
                 timeArea + "\n" +
                 fieldArea + "\n";
-        System.out.print(gameView);
+        System.out.print(gameView.toString());
     }
 
     private void drawMessage(String message){
@@ -110,7 +108,23 @@ public class ConsoleUI implements UserInterface {
 
     @Override
     public int showMessage(MessageType type, List<TableRow> scores) {
-        HighScoresDialog.showDialog(scores, new JFrame());
+        System.out.println("  " + " Size " + " Bombs " + " Time");
+        for(int i=0;i<15;++i){
+            if(scores.size() > i) {
+                TableRow row = scores.get(i);
+                System.out.print(i + 1);
+                if ((i < 9)) {
+                    System.out.print("  ");
+                } else {
+                    System.out.print(" ");
+                }
+                System.out.print(row.getWidth() + "x" + row.getHeight());
+                System.out.print("  " + row.getBombs() + "  ");
+                System.out.println(row.getTime());
+            }else{
+                System.out.println(i+1);
+            }
+        }
         return 0;
     }
 

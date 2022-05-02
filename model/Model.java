@@ -26,7 +26,7 @@ public class Model {
         this.subscriber = subscriber;
         this.informer = informer;
         highScores = new HighScores();
-        notifyView(true);
+        notifyView(true, false);
     }
 
     public Field getField(){
@@ -41,13 +41,13 @@ public class Model {
         this.seconds = seconds;
     }
 
-    public void notifyView(boolean isNewGame){
-        subscriber.notifyView(this, isNewGame);
+    public void notifyView(boolean isNewGame, boolean isTime){
+        subscriber.notifyView(this, isNewGame, isTime);
     }
 
     public void setSubscriber(Subscriber view){
         subscriber = view;
-        notifyView(false);
+        notifyView(false, false);
     }
 
     public void setAbout(About about){
@@ -55,22 +55,28 @@ public class Model {
     }
 
     public void saveGame(){
-        if(timer == null){
-            GameSaving.saveGame(field, 0);
-        }else{
-            GameSaving.saveGame(field, timer.getMilliseconds());
+        if(isGame) {
+            if (timer == null) {
+                GameSaving.saveGame(field, 0);
+            } else {
+                GameSaving.saveGame(field, timer.getMilliseconds());
+            }
         }
-
     }
 
-    public void loadGame(){
+    public void loadGame(boolean isModeSwitching){
         field = GameSaving.loadGame(this);
         timer = new Timer(this, seconds);
-        pause = false;
-        isNewGame = false;
-        isGame = true;
-        timer.start();
-        notifyView(true);
+        if(!isModeSwitching) {
+            pause = false;
+            isNewGame = false;
+            isGame = true;
+        }
+        if(!pause) {
+            timer.start();
+        }
+        notifyView(true, true);
+        notifyView(false, false);
     }
 
     public void processCommand(Commands command, List<Integer> arguments){
@@ -93,7 +99,7 @@ public class Model {
                     pause = false;
                     isNewGame = true;
                     isGame = true;
-                    notifyView(true);
+                    notifyView(true, false);
                 }
                 case setPlate -> {
                     if (isNewGame) {
@@ -117,7 +123,7 @@ public class Model {
                             highScores.addHighScore(field.getWidth(), field.getHeight(), field.getBombCount(), seconds / 1000);
                         }
                     }
-                    notifyView(false);
+                    notifyView(false, false);
                 }
                 case pause -> {
                     if(!pause) {
@@ -133,6 +139,7 @@ public class Model {
                         timer.start();
                     }
                 }
+                case about -> informer.showMessage(about.getAbout(), MessageType.info);
                 case exit -> {
                     if(!isNewGame) {
                         saveGame();
@@ -163,7 +170,7 @@ public class Model {
                     pause = false;
                     isNewGame = true;
                     isGame = true;
-                    notifyView(true);
+                    notifyView(true, false);
                 }
                 case highScores -> informer.showMessage(MessageType.highScores, highScores.getHighScores());
                 case about -> informer.showMessage(about.getAbout(), MessageType.info);

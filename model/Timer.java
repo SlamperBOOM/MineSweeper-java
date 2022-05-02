@@ -22,7 +22,7 @@ public class Timer extends Thread{
                 sleep(200);
                 seconds += 200;
                 if (seconds % 1000 == 0) {
-                    model.notifyView(false);
+                    model.notifyView(false, true);
                 }
             }catch (InterruptedException e) {
                 e.printStackTrace();

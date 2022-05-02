@@ -5,7 +5,6 @@ import model.Field;
 import model.Plate;
 import model.Timer;
 import model.highscores.TableRow;
-import view.HighScoresDialog;
 import view.MessageType;
 import view.SetModeDialog;
 import view.UserInterface;
@@ -283,7 +282,9 @@ public class WindowUI implements UserInterface, ActionListener {
 
     @Override
     public int showMessage(MessageType type, List<TableRow> scores) {
-        HighScoresDialog.showDialog(scores, window);
+        HighScoresDialog dialog = new HighScoresDialog(window);
+        dialog.createHighScoresView(scores);
+        dialog.showDialog();
         return 0;
     }
 
